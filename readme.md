@@ -28,4 +28,4 @@ El sistema fue desarrollado bajo arquitectura de microservicios, donde cada mód
 
 ## Repositorio Maestro
 
-- [https://github.com/Bastian-cloud/biblioteca-microservicios]
+- [https://github.com/Bastian-cloud/biblioteca-fullstack-final.git]
