@@ -31,26 +31,18 @@ El sistema fue desarrollado bajo arquitectura de microservicios, donde cada mód
 - [https://github.com/Bastian-cloud/biblioteca-fullstack-final.git]
 
 ## Diagrama de dependencias
-                ┌───────────┐
-                │   Auth    │
-                └─────▲─────┘
-                      │
-                ┌─────┴─────┐
-                │ Usuario   │
-                └───────────┘
-
-
- ┌───────────┐
- │  Libro    │◀────────────┐
- └───────────┘             │
-                           │
- ┌───────────┐             │
- │Inventario │◀────────────┤
- └───────────┘             │
-                           │
-                     ┌─────┴─────┐
-                     │ Prestamo  │
-                     └───────────┘
+                                     ┌───────────┐
+                                     │   Auth    │
+                                     └─────▲─────┘
+                                           │
+ ┌───────────┐     ┌───────────┐     ┌─────┴─────┐
+ │   Multa   │────▶│  Prestamo │───▶│  Usuario  │
+ └───────────┘     └─────┬──┬──┘     └───────────┘
+              ┌──────────┘  └──────────┐
+              ▼                        ▼
+        ┌───────────┐           ┌───────────┐
+        │   Libro   │           │Inventario │
+        └───────────┘           └───────────┘
 
 
 ## Tabla de contratos
