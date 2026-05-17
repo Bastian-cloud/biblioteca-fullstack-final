@@ -56,7 +56,9 @@ public class AuthController {
 
     // Eliminar
     @DeleteMapping("/usuarios/{id}")
-    public void eliminar(@PathVariable Long id){
-        service.eliminar(id);
+        public String eliminar(@PathVariable Long id){
+
+            service.eliminar(id);
+        return "Usuario eliminado con éxito";
     }
 }

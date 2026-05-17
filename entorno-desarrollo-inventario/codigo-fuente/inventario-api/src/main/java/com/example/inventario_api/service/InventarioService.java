@@ -1,54 +1,56 @@
 package com.example.inventario_api.service;
 
+import com.example.inventario_api.dto.InventarioCreateDTO;
+import com.example.inventario_api.dto.InventarioDTO;
 import com.example.inventario_api.model.Inventario;
 import com.example.inventario_api.repository.InventarioRepository;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class InventarioService {
 
-    private final InventarioRepository repository;
+    @Autowired
+    private InventarioRepository repository;
 
-    public InventarioService(InventarioRepository repository) {
-        this.repository = repository;
+    // GET /api/libros/{id}
+    public InventarioDTO findDtoById(Long id) {
+
+        Inventario i = repository.findById(id)
+            .orElseThrow(() ->
+                new RuntimeException("Libro no encontrado"));
+
+        return new InventarioDTO(
+            i.getId(),
+            i.getLibroId(),
+            i.getStock(),
+            i.getUbicacion(),
+            i.getEstado()
+        );
+ 
     }
 
-    public Inventario guardar(Inventario inventario) {
-        return repository.save(inventario);
-    }
+    // POST /api/libros
+    public InventarioDTO crearInventario(InventarioCreateDTO dto) {
 
-    public List<Inventario> listarTodos() {
-        return repository.findAll();
-    }
+        // 1. Convertir DTO de entrada a entidad
+        Inventario libro = new Inventario();
+        libro.setLibroId(dto.getLibroId());
+        libro.setStock(dto.getStock());
+        libro.setUbicacion(dto.getUbicacion());
+        libro.setEstado(dto.getEstado());
 
-    public Optional<Inventario> buscarPorId(Long id) {
-        return repository.findById(id);
-    }
+        // 2. Guardar en BD
+        Inventario guardado = repository.save(libro);
 
-    public Inventario actualizar(Long id, Inventario datos) {
-        Optional<Inventario> actual = repository.findById(id);
-
-        if (actual.isPresent()) {
-            Inventario inv = actual.get();
-            inv.setLibroId(datos.getLibroId());
-            inv.setStock(datos.getStock());
-            inv.setUbicacion(datos.getUbicacion());
-            inv.setEstado(datos.getEstado());
-
-            return repository.save(inv);
-        }
-
-        return null;
-    }
-
-    public boolean eliminar(Long id) {
-        if (repository.existsById(id)) {
-            repository.deleteById(id);
-            return true;
-        }
-        return false;
+        // 3. Convertir entidad guardada a DTO de salida
+        return new InventarioDTO(
+            guardado.getId(),
+            guardado.getLibroId(),
+            guardado.getStock(),
+            guardado.getUbicacion(),
+            guardado.getEstado()
+        );
     }
 }

@@ -1,0 +1,142 @@
+services:
+
+  mysql_servidor:
+    image: mysql:8.0
+    container_name: mysql_servidor
+    environment:
+      MYSQL_ROOT_PASSWORD: clave_maestra_root
+      MYSQL_DATABASE: universidad_backend
+      MYSQL_USER: desarrollador
+      MYSQL_PASSWORD: password_seguro_123
+    ports:
+      - "3306:3306"
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+
+  entorno-desarrollo:
+    build:
+      context: ./entorno-desarrollo/codigo-fuente/backend-api
+    container_name: entorno-desarrollo
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql_servidor:
+        condition: service_healthy
+    networks:
+      - backend-net
+
+  entorno-desarrollo-inventario:
+    build:
+      context: ./entorno-desarrollo-inventario/codigo-fuente/inventario-api
+    container_name: entorno-desarrollo-inventario
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql_servidor:
+        condition: service_healthy
+    networks:
+      - backend-net
+
+  entorno-desarrollo-prestamo:
+    build:
+      context: ./entorno-desarrollo-prestamo/codigo-fuente/prestamo-api
+    container_name: entorno-desarrollo-prestamo
+    ports:
+      - "8082:8082"
+    depends_on:
+      mysql_servidor:
+        condition: service_healthy
+    networks:
+      - backend-net
+
+  entorno-desarrollo-usuario:
+    build:
+      context: ./entorno-desarrollo-usuario/codigo-fuente/usuario-api
+    container_name: entorno-desarrollo-usuario
+    ports:
+      - "8083:8083"
+    depends_on:
+      mysql_servidor:
+        condition: service_healthy
+    networks:
+      - backend-net
+
+  entorno-desarrollo-autenticacion:
+    build:
+      context: ./entorno-desarrollo-autenticacion/codigo-fuente/auth-api
+    container_name: entorno-desarrollo-autenticacion
+    ports:
+      - "8084:8084"
+    depends_on:
+      mysql_servidor:
+        condition: service_healthy
+    networks:
+      - backend-net
+
+  entorno-desarrollo-multa:
+    build:
+      context: ./entorno-desarrollo-multa/codigo-fuente/multa
+    container_name: entorno-desarrollo-multa
+    ports:
+      - "8085:8085"
+    depends_on:
+      mysql_servidor:
+        condition: service_healthy
+    networks:
+      - backend-net
+
+  entorno-desarrollo-reserva:
+    build:
+      context: ./entorno-desarrollo-reserva/codigo-fuente/reserva
+    container_name: entorno-desarrollo-reserva
+    ports:
+      - "8086:8086"
+    depends_on:
+      mysql_servidor:
+        condition: service_healthy
+    networks:
+      - backend-net
+
+  entorno-desarrollo-categoria:
+    build:
+      context: ./entorno-desarrollo-categoria/codigo-fuente/categoria
+    container_name: entorno-desarrollo-categoria
+    ports:
+      - "8087:8087"
+    depends_on:
+      mysql_servidor:
+        condition: service_healthy
+    networks:
+      - backend-net
+
+  entorno-desarrollo-autor:
+    build:
+      context: ./entorno-desarrollo-autor/codigo-fuente/autor
+    container_name: entorno-desarrollo-autor
+    ports:
+      - "8088:8088"
+    depends_on:
+      mysql_servidor:
+        condition: service_healthy
+    networks:
+      - backend-net
+
+  entorno-desarrollo-notificacion:
+    build:
+      context: ./entorno-desarrollo-notificacion/codigo-fuente/notificacion
+    container_name: entorno-desarrollo-notificacion
+    ports:
+      - "8089:8089"
+    depends_on:
+      mysql_servidor:
+        condition: service_healthy
+    networks:
+      - backend-net
+networks:
+  backend-net:
+    driver: bridge

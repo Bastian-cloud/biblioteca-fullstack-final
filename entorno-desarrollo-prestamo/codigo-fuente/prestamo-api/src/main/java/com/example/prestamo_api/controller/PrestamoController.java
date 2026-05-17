@@ -1,43 +1,43 @@
 package com.example.prestamo_api.controller;
 
-import com.example.prestamo_api.model.Prestamo;
+import com.example.prestamo_api.dto.PrestamoCreateDTO;
+import com.example.prestamo_api.dto.PrestamoDTO;
 import com.example.prestamo_api.service.PrestamoService;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import jakarta.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/prestamos")
 public class PrestamoController {
 
-    private final PrestamoService service;
+    @Autowired
+    private PrestamoService service;
 
-    public PrestamoController(PrestamoService service){
-        this.service = service;
-    }
-
-    @GetMapping
-    public List<Prestamo> listar(){
-        return service.listar();
-    }
-
+    // GET /api/prestamos/{id}
     @GetMapping("/{id}")
-    public Prestamo buscar(@PathVariable Long id){
-        return service.buscar(id).orElse(null);
+    public ResponseEntity<PrestamoDTO> getPrestamo(@PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                service.findDtoById(id)
+        );
     }
 
+    // POST /api/prestamos
     @PostMapping
-    public Prestamo guardar(@RequestBody Prestamo p){
-        return service.guardar(p);
-    }
+    public ResponseEntity<PrestamoDTO> crearPrestamo(
+            @Valid @RequestBody PrestamoCreateDTO dto) {
 
-    @PutMapping("/{id}")
-    public Prestamo actualizar(@PathVariable Long id,@RequestBody Prestamo p){
-        return service.actualizar(id,p);
-    }
+        PrestamoDTO creado = service.crearPrestamo(dto);
 
-    @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id){
-        service.eliminar(id);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(creado);
     }
 }

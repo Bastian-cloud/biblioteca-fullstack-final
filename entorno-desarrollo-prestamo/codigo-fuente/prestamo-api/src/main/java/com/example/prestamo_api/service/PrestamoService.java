@@ -1,45 +1,78 @@
 package com.example.prestamo_api.service;
 
+import com.example.prestamo_api.client.LibroClient;
+import com.example.prestamo_api.dto.LibroDTO;
+import com.example.prestamo_api.dto.PrestamoCreateDTO;
+import com.example.prestamo_api.dto.PrestamoDTO;
 import com.example.prestamo_api.model.Prestamo;
 import com.example.prestamo_api.repository.PrestamoRepository;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import org.springframework.stereotype.Service;
 
 @Service
 public class PrestamoService {
 
-    private final PrestamoRepository repo;
+    private final PrestamoRepository repository;
+    private final LibroClient libroClient;
 
-    public PrestamoService(PrestamoRepository repo){
-        this.repo = repo;
+    public PrestamoService(
+            PrestamoRepository repository,
+            LibroClient libroClient) {
+
+        this.repository = repository;
+        this.libroClient = libroClient;
     }
 
-    public List<Prestamo> listar(){
-        return repo.findAll();
+    // GET /api/prestamos/{id}
+    public PrestamoDTO findDtoById(Long id) {
+
+        Prestamo p = repository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Préstamo no encontrado"));
+
+        // Consulta a microservicio libro
+        LibroDTO libro = libroClient.getLibroById(p.getLibroId());
+
+        return new PrestamoDTO(
+                p.getId(),
+                libro.getTitulo(),
+                p.getUsuario(),
+                p.getFechaPrestamo(),
+                p.getFechaDevolucion(),
+                p.getEstado()
+        );
     }
 
-    public Optional<Prestamo> buscar(Long id){
-        return repo.findById(id);
-    }
+    // POST /api/prestamos
+    public PrestamoDTO crearPrestamo(PrestamoCreateDTO dto) {
 
-    public Prestamo guardar(Prestamo p){
-        return repo.save(p);
-    }
+        // Validar libro en microservicio externo
+        LibroDTO libro = libroClient.getLibroById(dto.getLibroId());
 
-    public Prestamo actualizar(Long id, Prestamo datos){
-        return repo.findById(id).map(p -> {
-            p.setLibro(datos.getLibro());
-            p.setUsuario(datos.getUsuario());
-            p.setFechaPrestamo(datos.getFechaPrestamo());
-            p.setFechaDevolucion(datos.getFechaDevolucion());
-            p.setEstado(datos.getEstado());
-            return repo.save(p);
-        }).orElse(null);
-    }
+        if (libro == null) {
+            throw new RuntimeException("Libro no encontrado");
+        }
 
-    public void eliminar(Long id){
-        repo.deleteById(id);
+        // Convertir DTO a entidad
+        Prestamo prestamo = new Prestamo();
+
+        prestamo.setLibroId(dto.getLibroId());
+        prestamo.setUsuario(dto.getUsuario());
+        prestamo.setFechaPrestamo(dto.getFechaPrestamo());
+        prestamo.setFechaDevolucion(dto.getFechaDevolucion());
+        prestamo.setEstado(dto.getEstado());
+
+        // Guardar
+        Prestamo guardado = repository.save(prestamo);
+
+        // Retornar DTO
+        return new PrestamoDTO(
+                guardado.getId(),
+                libro.getTitulo(),
+                guardado.getUsuario(),
+                guardado.getFechaPrestamo(),
+                guardado.getFechaDevolucion(),
+                guardado.getEstado()
+        );
     }
 }
