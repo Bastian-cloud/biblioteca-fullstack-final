@@ -4,26 +4,26 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name="prestamos")
+@Table(name = "prestamos")
 public class Prestamo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private Long libroId;
-    private String usuario;
+    private Long usuarioId;
+
     private LocalDate fechaPrestamo;
     private LocalDate fechaDevolucion;
+
     private String estado;
 
-    public Prestamo(){}
+    public Prestamo() {
+    }
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Long getLibroId() {
@@ -34,12 +34,12 @@ public class Prestamo {
         this.libroId = libroId;
     }
 
-    public String getUsuario() {
-        return usuario;
+    public Long getUsuarioId() {
+        return usuarioId;
     }
 
-    public void setUsuario(String usuario) {
-        this.usuario = usuario;
+    public void setUsuarioId(Long usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
     public LocalDate getFechaPrestamo() {

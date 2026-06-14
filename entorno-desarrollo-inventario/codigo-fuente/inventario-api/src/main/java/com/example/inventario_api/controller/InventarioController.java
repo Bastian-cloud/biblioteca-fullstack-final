@@ -6,38 +6,62 @@ import com.example.inventario_api.service.InventarioService;
 
 import jakarta.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/inventario")
 public class InventarioController {
 
-    @Autowired
-    private InventarioService service;
+    private final InventarioService service;
 
-    // GET /api/libros/{id}
+    public InventarioController(InventarioService service) {
+        this.service = service;
+    }
+
+    // GET
     @GetMapping("/{id}")
-    public ResponseEntity<InventarioDTO> getLibro(@PathVariable Long id) {
+    public ResponseEntity<InventarioDTO> getInventario(
+            @PathVariable Long id) {
 
         return ResponseEntity.ok(
                 service.findDtoById(id)
         );
     }
 
-    // POST /api/libros
+    // POST
     @PostMapping
-    public ResponseEntity<InventarioDTO> crearLibro(
+    public ResponseEntity<InventarioDTO> crearInventario(
             @Valid @RequestBody InventarioCreateDTO dto) {
 
-        InventarioDTO creado = service.crearInventario(dto);
+        InventarioDTO creado =
+                service.crearInventario(dto);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(creado);
+    }
+
+    // PUT
+    @PutMapping("/{id}")
+    public ResponseEntity<InventarioDTO> actualizarInventario(
+            @PathVariable Long id,
+            @Valid @RequestBody InventarioCreateDTO dto) {
+
+        InventarioDTO actualizado =
+                service.actualizarInventario(id, dto);
+
+        return ResponseEntity.ok(actualizado);
+    }
+
+    // DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarInventario(
+            @PathVariable Long id) {
+
+        service.eliminarInventario(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

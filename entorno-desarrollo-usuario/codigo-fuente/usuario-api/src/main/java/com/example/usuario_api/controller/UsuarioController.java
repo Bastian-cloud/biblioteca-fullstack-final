@@ -2,6 +2,11 @@ package com.example.usuario_api.controller;
 
 import com.example.usuario_api.model.Usuario;
 import com.example.usuario_api.service.UsuarioService;
+
+import jakarta.validation.Valid;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,36 +21,53 @@ public class UsuarioController {
         this.service = service;
     }
 
+    // GET ALL
     @GetMapping
-    public List<Usuario> listar() {
-        return service.listar();
+    public ResponseEntity<List<Usuario>> listar() {
+        return ResponseEntity.ok(service.listar());
     }
 
+    // GET BY ID
     @GetMapping("/{id}")
-    public Usuario buscar(@PathVariable Long id) {
-        return service.buscar(id).orElse(null);
+    public ResponseEntity<Usuario> buscar(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                service.buscar(id)
+        );
     }
 
+    // POST
     @PostMapping
-    public Usuario guardar(@RequestBody Usuario usuario) {
-        return service.guardar(usuario);
+    public ResponseEntity<Usuario> guardar(
+            @Valid @RequestBody Usuario usuario) {
+
+        Usuario creado = service.guardar(usuario);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(creado);
     }
 
+    // PUT
     @PutMapping("/{id}")
-    public Usuario actualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
-        return service.actualizar(id, usuario);
+    public ResponseEntity<Usuario> actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody Usuario usuario) {
+
+        Usuario actualizado =
+                service.actualizar(id, usuario);
+
+        return ResponseEntity.ok(actualizado);
     }
 
+    // DELETE
     @DeleteMapping("/{id}")
-    public String eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(
+            @PathVariable Long id) {
 
-        if(service.buscar(id).isPresent()) {
+        service.eliminar(id);
 
-            service.eliminar(id);
-
-            return "Usuario eliminado con éxito";
-        }
-
-        return "Usuario no encontrado";
+        return ResponseEntity.noContent().build();
     }
 }

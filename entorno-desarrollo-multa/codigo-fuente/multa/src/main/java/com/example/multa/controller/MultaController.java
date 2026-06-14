@@ -3,7 +3,9 @@ package com.example.multa.controller;
 import com.example.multa.dto.MultaCreateDTO;
 import com.example.multa.dto.MultaDTO;
 import com.example.multa.service.MultaService;
+
 import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,13 +20,48 @@ public class MultaController {
         this.service = service;
     }
 
+    // GET /api/multas/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<MultaDTO> getMulta(@PathVariable Long id) {
-        return ResponseEntity.ok(service.findDtoById(id));
+    public ResponseEntity<MultaDTO> getMulta(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                service.findDtoById(id)
+        );
     }
 
+    // POST /api/multas
     @PostMapping
-    public ResponseEntity<MultaDTO> crearMulta(@Valid @RequestBody MultaCreateDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.crearMulta(dto));
+    public ResponseEntity<MultaDTO> crearMulta(
+            @Valid @RequestBody MultaCreateDTO dto) {
+
+        MultaDTO creada = service.crearMulta(dto);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(creada);
+    }
+
+    // PUT /api/multas/{id}
+    @PutMapping("/{id}")
+    public ResponseEntity<MultaDTO> actualizarMulta(
+            @PathVariable Long id,
+            @Valid @RequestBody MultaCreateDTO dto) {
+
+        return ResponseEntity.ok(
+                service.actualizarMulta(id, dto)
+        );
+    }
+
+    // DELETE /api/multas/{id}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> eliminarMulta(
+            @PathVariable Long id) {
+
+        service.eliminarMulta(id);
+
+        return ResponseEntity.ok(
+                "Multa eliminada correctamente"
+        );
     }
 }

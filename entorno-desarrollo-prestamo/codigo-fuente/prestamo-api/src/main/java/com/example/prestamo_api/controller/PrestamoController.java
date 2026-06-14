@@ -40,4 +40,24 @@ public class PrestamoController {
                 .status(HttpStatus.CREATED)
                 .body(creado);
     }
+
+    // PUT /api/prestamos/{id}
+    @PutMapping("/{id}")
+    public ResponseEntity<PrestamoDTO> actualizarPrestamo(
+            @PathVariable Long id,
+            @Valid @RequestBody PrestamoCreateDTO dto) {
+
+        PrestamoDTO actualizado = service.actualizarPrestamo(id, dto);
+
+        return ResponseEntity.ok(actualizado);
+    }
+
+    // DELETE /api/prestamos/{id}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarPrestamo(@PathVariable Long id) {
+
+        service.eliminarPrestamo(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }

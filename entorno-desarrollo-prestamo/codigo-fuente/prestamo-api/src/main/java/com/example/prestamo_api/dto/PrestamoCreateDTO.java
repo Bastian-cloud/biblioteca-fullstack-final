@@ -1,20 +1,29 @@
 package com.example.prestamo_api.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 
 public class PrestamoCreateDTO {
 
+    @NotNull(message = "El ID del libro es obligatorio")
     private Long libroId;
 
-    private String usuario;
+    @NotNull(message = "El ID del usuario es obligatorio")
+    private Long usuarioId;
 
+    @NotNull(message = "La fecha de préstamo es obligatoria")
     private LocalDate fechaPrestamo;
 
+    @NotNull(message = "La fecha de devolución es obligatoria")
     private LocalDate fechaDevolucion;
 
+    @NotBlank(message = "El estado es obligatorio")
     private String estado;
 
-    public PrestamoCreateDTO() {}
+    public PrestamoCreateDTO() {
+    }
 
     public Long getLibroId() {
         return libroId;
@@ -24,12 +33,12 @@ public class PrestamoCreateDTO {
         this.libroId = libroId;
     }
 
-    public String getUsuario() {
-        return usuario;
+    public Long getUsuarioId() {
+        return usuarioId;
     }
 
-    public void setUsuario(String usuario) {
-        this.usuario = usuario;
+    public void setUsuarioId(Long usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
     public LocalDate getFechaPrestamo() {

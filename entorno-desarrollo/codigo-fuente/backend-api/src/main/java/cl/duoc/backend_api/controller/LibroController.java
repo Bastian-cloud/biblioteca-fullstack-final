@@ -40,4 +40,26 @@ public class LibroController {
                 .status(HttpStatus.CREATED)
                 .body(creado);
     }
+
+    // PUT /api/libros/{id}
+    @PutMapping("/{id}")
+    public ResponseEntity<LibroDTO> actualizarLibro(
+            @PathVariable Long id,
+            @Valid @RequestBody LibroCreateDTO dto) {
+
+        LibroDTO actualizado =
+                service.actualizarLibro(id, dto);
+
+        return ResponseEntity.ok(actualizado);
+    }
+
+    // DELETE /api/libros/{id}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarLibro(
+            @PathVariable Long id) {
+
+        service.eliminarLibro(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }

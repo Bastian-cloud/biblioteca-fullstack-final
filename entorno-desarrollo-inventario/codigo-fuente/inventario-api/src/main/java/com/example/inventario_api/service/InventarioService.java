@@ -2,55 +2,119 @@ package com.example.inventario_api.service;
 
 import com.example.inventario_api.dto.InventarioCreateDTO;
 import com.example.inventario_api.dto.InventarioDTO;
+import com.example.inventario_api.exception.RecursoNoEncontradoException;
 import com.example.inventario_api.model.Inventario;
 import com.example.inventario_api.repository.InventarioRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class InventarioService {
 
-    @Autowired
-    private InventarioRepository repository;
+    private static final Logger log =
+            LoggerFactory.getLogger(InventarioService.class);
 
-    // GET /api/libros/{id}
-    public InventarioDTO findDtoById(Long id) {
+    private final InventarioRepository repository;
 
-        Inventario i = repository.findById(id)
-            .orElseThrow(() ->
-                new RuntimeException("Libro no encontrado"));
-
-        return new InventarioDTO(
-            i.getId(),
-            i.getLibroId(),
-            i.getStock(),
-            i.getUbicacion(),
-            i.getEstado()
-        );
- 
+    public InventarioService(InventarioRepository repository) {
+        this.repository = repository;
     }
 
-    // POST /api/libros
+    // GET
+    public InventarioDTO findDtoById(Long id) {
+
+        log.info("Buscando inventario con id={}", id);
+
+        Inventario i = repository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Inventario id={} no encontrado", id);
+                    return new RecursoNoEncontradoException(
+                            "Inventario no encontrado");
+                });
+
+        return new InventarioDTO(
+                i.getId(),
+                i.getLibroId(),
+                i.getStock(),
+                i.getUbicacion(),
+                i.getEstado()
+        );
+    }
+
+    // POST
     public InventarioDTO crearInventario(InventarioCreateDTO dto) {
 
-        // 1. Convertir DTO de entrada a entidad
-        Inventario libro = new Inventario();
-        libro.setLibroId(dto.getLibroId());
-        libro.setStock(dto.getStock());
-        libro.setUbicacion(dto.getUbicacion());
-        libro.setEstado(dto.getEstado());
+        log.info("Creando inventario para libro id={}",
+                dto.getLibroId());
 
-        // 2. Guardar en BD
-        Inventario guardado = repository.save(libro);
+        Inventario inventario = new Inventario();
+        inventario.setLibroId(dto.getLibroId());
+        inventario.setStock(dto.getStock());
+        inventario.setUbicacion(dto.getUbicacion());
+        inventario.setEstado(dto.getEstado());
 
-        // 3. Convertir entidad guardada a DTO de salida
+        Inventario guardado = repository.save(inventario);
+
+        log.info("Inventario creado correctamente. ID={}",
+                guardado.getId());
+
         return new InventarioDTO(
-            guardado.getId(),
-            guardado.getLibroId(),
-            guardado.getStock(),
-            guardado.getUbicacion(),
-            guardado.getEstado()
+                guardado.getId(),
+                guardado.getLibroId(),
+                guardado.getStock(),
+                guardado.getUbicacion(),
+                guardado.getEstado()
         );
+    }
+
+    // PUT
+    public InventarioDTO actualizarInventario(Long id,
+                                              InventarioCreateDTO dto) {
+
+        log.info("Actualizando inventario id={}", id);
+
+        Inventario inventario = repository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Inventario id={} no encontrado para actualizar", id);
+                    return new RecursoNoEncontradoException(
+                            "Inventario no encontrado");
+                });
+
+        inventario.setLibroId(dto.getLibroId());
+        inventario.setStock(dto.getStock());
+        inventario.setUbicacion(dto.getUbicacion());
+        inventario.setEstado(dto.getEstado());
+
+        Inventario actualizado = repository.save(inventario);
+
+        log.info("Inventario actualizado correctamente. ID={}",
+                actualizado.getId());
+
+        return new InventarioDTO(
+                actualizado.getId(),
+                actualizado.getLibroId(),
+                actualizado.getStock(),
+                actualizado.getUbicacion(),
+                actualizado.getEstado()
+        );
+    }
+
+    // DELETE
+    public void eliminarInventario(Long id) {
+
+        log.info("Eliminando inventario id={}", id);
+
+        Inventario inventario = repository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Inventario id={} no encontrado para eliminar", id);
+                    return new RecursoNoEncontradoException(
+                            "Inventario no encontrado");
+                });
+
+        repository.delete(inventario);
+
+        log.info("Inventario eliminado correctamente. ID={}", id);
     }
 }

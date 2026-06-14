@@ -15,5 +15,4 @@ public class InventarioDTO {
     private String ubicacion;
     private String estado;
     
-    // OJO: no se incluye passwordHash, ni createdAt, ni relaciones JPA
 }

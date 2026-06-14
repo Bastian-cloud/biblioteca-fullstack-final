@@ -1,30 +1,21 @@
 package com.example.prestamo_api.dto;
 
-import java.time.LocalDate;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class UsuarioDTO {
 
-    @NotNull(message = "El ID del libro es obligatorio")
-    private Long libroId;
+    private Long id;
+    private String nombre;
+    private String correo;
+    private String rol;
 
-    @NotNull(message = "El ID del usuario es obligatorio")
-    private Long usuarioId;
+    public UsuarioDTO() {}
 
-    @NotNull(message = "La fecha de préstamo es obligatoria")
-    private LocalDate fechaPrestamo;
+    public Long getId() { return id; }
+    public String getNombre() { return nombre; }
+    public String getCorreo() { return correo; }
+    public String getRol() { return rol; }
 
-    @NotNull(message = "La fecha de devolución es obligatoria")
-    private LocalDate fechaDevolucion;
-
-    @NotBlank(message = "El estado es obligatorio")
-    private String estado;
-
+    public void setId(Long id) { this.id = id; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setCorreo(String correo) { this.correo = correo; }
+    public void setRol(String rol) { this.rol = rol; }
 }
