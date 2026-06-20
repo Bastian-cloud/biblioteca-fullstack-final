@@ -1,26 +1,37 @@
 package com.example.prestamo_api.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
-import lombok.Data;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class InventarioDTO {
 
-    @NotNull(message = "El libroId es obligatorio")
+    private Long id;
     private Long libroId;
-
-    @NotNull(message = "El stock es obligatorio")
     private Integer stock;
-
-    @NotBlank(message = "Ingrese una ubicación")
     private String ubicacion;
-
-    @NotBlank(message = "Ingrese estado activo o inactivo")
     private String estado;
+
+    public InventarioDTO() {}
+
+    public InventarioDTO(
+            Long id,
+            Long libroId,
+            Integer stock,
+            String ubicacion,
+            String estado) {
+        this.id = id;
+        this.libroId = libroId;
+        this.stock = stock;
+        this.ubicacion = ubicacion;
+        this.estado = estado;
+    }
+
+    public Long getId() { return id; }
+    public Long getLibroId() { return libroId; }
+    public Integer getStock() { return stock; }
+    public String getUbicacion() { return ubicacion; }
+    public String getEstado() { return estado; }
+
+    public void setId(Long id) { this.id = id; }
+    public void setLibroId(Long libroId) { this.libroId = libroId; }
+    public void setStock(Integer stock) { this.stock = stock; }
+    public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
+    public void setEstado(String estado) { this.estado = estado; }
 }

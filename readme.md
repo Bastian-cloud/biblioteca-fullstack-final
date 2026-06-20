@@ -31,18 +31,24 @@ El sistema fue desarrollado bajo arquitectura de microservicios, donde cada mód
 - [https://github.com/Bastian-cloud/biblioteca-fullstack-final.git]
 
 ## Diagrama de dependencias
-                                     ┌───────────┐
-                                     │   Auth    │
-                                     └─────▲─────┘
-                                           │
- ┌───────────┐     ┌───────────┐     ┌─────┴─────┐
- │   Multa   │────▶│  Prestamo │───▶│  Usuario  │
- └───────────┘     └─────┬──┬──┘     └───────────┘
-              ┌──────────┘  └──────────┐
-              ▼                        ▼
-        ┌───────────┐           ┌───────────┐
-        │   Libro   │           │Inventario │
-        └───────────┘           └───────────┘
+                ┌─────────────────┐
+                │   Usuario API   │
+                │     (8083)      │
+                └────────┬────────┘
+                         │
+                         │ valida usuario
+                         │
+┌──────────────┐   ┌─────▼──────┐   ┌────────────────┐
+│ Libro API    │◄──┤Prestamo API├──►│ Inventario API │
+│   (8080)     │   │   (8082)   │   │     (8081)     │
+└──────────────┘   └─────┬──────┘   └────────────────┘
+                         │
+                         │ genera multa
+                         │
+                  ┌──────▼──────┐
+                  │  Multa API  │
+                  │   (8084)    │
+                  └─────────────┘
 
 
 ## Tabla de contratos
@@ -190,7 +196,10 @@ Security Groups configurados:
 ### 1. Levantar todos los servicios
 
 ```bash
+##Sin ninguna modificación
 docker compose up -d
+##En caso de que se haya modificado el codigo fuente
+docker compose up --build 
 ```
 
 ### 2. Verificar que los contenedores estén activos
@@ -212,17 +221,17 @@ Importar:
 Realizar una solicitud POST:
 
 ```http
-POST http://52.73.191.33:8082/prestamo
+POST http://52.73.191.33:8082/api/prestamos
 ```
 
 Body:
 
 ```json
 {
-  "libroId": 2,
+  "libroId": 1,
   "usuarioId": 1,
-  "fechaPrestamo": "2025-05-08",
-  "fechaDevolucion": "2025-05-15",
+  "fechaPrestamo": "2026-06-14",
+  "fechaDevolucion": "2026-06-21",
   "estado": "ACTIVO"
 }
 ```
@@ -232,8 +241,189 @@ Body:
 Detener un servicio:
 
 ```bash
-docker stop libro-app
+docker stop entorno-desarrollo
 ```
-
 Reintentar la solicitud desde Postman y verificar el manejo de errores.
 
+# Sistema de Biblioteca - Arquitectura de Microservicios
+## Microservicios del sistema
+
+### Libro API
+
+Encargado de la administración de libros disponibles en la biblioteca.
+
+Funciones:
+
+* Crear libros
+* Buscar libros por ID
+* Actualizar información de libros
+* Eliminar libros
+
+Puerto:
+8080
+
+---
+
+### Inventario API
+
+Gestiona el stock y la ubicación física de los libros.
+
+Funciones:
+
+* Consultar stock disponible
+* Actualizar stock
+* Validar disponibilidad de libros
+
+Puerto:
+8081
+
+---
+
+### Prestamo API
+
+Administra los préstamos realizados por usuarios.
+
+Funciones:
+
+* Crear préstamos
+* Consultar préstamos
+* Actualizar préstamos
+* Eliminar préstamos
+* Validar stock antes de prestar
+
+Puerto:
+8082
+
+---
+
+### Usuario API
+
+Gestiona la información de los usuarios registrados.
+
+Funciones:
+
+* Crear usuarios
+* Buscar usuarios
+* Actualizar usuarios
+* Eliminar usuarios
+
+Puerto:
+8083
+
+---
+
+### Multa API
+
+Gestiona multas asociadas a préstamos vencidos.
+
+Funciones:
+
+* Crear multas
+* Consultar multas
+* Actualizar multas
+* Eliminar multas
+
+Puerto:
+8085
+
+---
+
+## Arquitectura de comunicación
+
+Prestamo API se comunica con:
+
+* Libro API
+* Usuario API
+* Inventario API
+
+Multa API se comunica con:
+
+* Prestamo API
+
+Comunicación implementada mediante:
+
+* Feign Client
+* REST API
+* Docker Network
+
+---
+
+## Swagger Documentation
+
+### Libro API
+
+http://52.73.191.33:8080/doc/swagger-ui.html
+
+### Inventario API
+
+http://52.73.191.33:8081/doc/swagger-ui.html
+
+### Prestamo API
+
+http://52.73.191.33:8082/doc/swagger-ui.html
+
+### Usuario API
+
+http://52.73.191.33:8083/doc/swagger-ui.html
+
+### Multa API
+
+http://52.73.191.33:8085/doc/swagger-ui.html
+
+## Tecnologías utilizadas
+
+* Java 21
+* Spring Boot
+* Spring Data JPA
+* Spring Validation
+* OpenFeign
+* Swagger / OpenAPI
+* MySQL
+* Docker
+* Docker Compose
+* JUnit 5
+* Mockito
+
+## Ejecución del proyecto Para tests unitarios esto sirve tanto para prestamo como para multa
+
+### 1. Ingresar al proyecto
+
+```bash
+cd entornos
+cd entorno-desarrollo-prestamo
+cd codigo-fuente
+cd prestamo-api
+```
+
+---
+
+## Testing
+
+Para ejecutar pruebas unitarias:
+
+```bash
+./mvnw test
+```
+
+Incluye pruebas para:
+
+* Model
+* Repository
+* Service
+* Controller
+
+---
+
+## Reglas de negocio implementadas
+
+* No se puede crear un préstamo si el libro no existe.
+* No se puede crear un préstamo si el usuario no existe.
+* No se puede crear un préstamo si no existe inventario.
+* No se puede crear un préstamo si el stock es 0.
+* Las multas se generan sobre préstamos vencidos.
+
+---
+
+## Autor
+
+Bastian Mendoza

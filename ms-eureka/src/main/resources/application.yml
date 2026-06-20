@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        # Ruta para el microservicio de préstamos
+        - id: prestamo-service
+          uri: http://entorno-desarrollo-prestamo:8082
+          predicates:
+            - Path=/api/prestamos/**
+          filters:
+            - StripPrefix=0
+
+        # Ruta para el microservicio de multas
+        - id: multa-service
+          uri: http://entorno-desarrollo-multa:8085
+          predicates:
+            - Path=/api/multas/**
+          filters:
+            - StripPrefix=0
+
+        # Ruta para el microservicio de usuarios
+        - id: usuario-service
+          uri: http://entorno-desarrollo-usuario:8083
+          predicates:
+            - Path=/api/usuarios/**
+          filters:
+            - StripPrefix=0
+
+        # Ruta para el microservicio de libros
+        - id: libro-service
+          uri: http://entorno-desarrollo-libro:8080
+          predicates:
+            - Path=/api/libros/**
+          filters:
+            - StripPrefix=0
+
+        # Ruta para el microservicio de inventario
+        - id: inventario-service
+          uri: http://entorno-desarrollo-inventario:8081
+          predicates:
+            - Path=/api/inventario/**
+          filters:
+            - StripPrefix=0
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

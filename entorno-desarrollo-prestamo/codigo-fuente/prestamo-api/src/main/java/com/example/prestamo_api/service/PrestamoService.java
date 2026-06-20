@@ -2,10 +2,12 @@ package com.example.prestamo_api.service;
 
 import com.example.prestamo_api.client.LibroClient;
 import com.example.prestamo_api.client.UsuarioClient;
+import com.example.prestamo_api.client.InventarioClient;
 import com.example.prestamo_api.dto.LibroDTO;
+import com.example.prestamo_api.dto.UsuarioDTO;
+import com.example.prestamo_api.dto.InventarioDTO;
 import com.example.prestamo_api.dto.PrestamoCreateDTO;
 import com.example.prestamo_api.dto.PrestamoDTO;
-import com.example.prestamo_api.dto.UsuarioDTO;
 import com.example.prestamo_api.exception.RecursoNoEncontradoException;
 import com.example.prestamo_api.exception.ServicioNoDisponibleException;
 import com.example.prestamo_api.model.Prestamo;
@@ -25,15 +27,18 @@ public class PrestamoService {
     private final PrestamoRepository repository;
     private final LibroClient libroClient;
     private final UsuarioClient usuarioClient;
+    private final InventarioClient inventarioClient;
 
     public PrestamoService(
             PrestamoRepository repository,
             LibroClient libroClient,
-            UsuarioClient usuarioClient) {
+            UsuarioClient usuarioClient,
+            InventarioClient inventarioClient) {
 
         this.repository = repository;
         this.libroClient = libroClient;
         this.usuarioClient = usuarioClient;
+        this.inventarioClient = inventarioClient;
     }
 
     // GET
@@ -85,6 +90,7 @@ public class PrestamoService {
 
         LibroDTO libro;
         UsuarioDTO usuario;
+        InventarioDTO inventario;
 
         try {
             log.info("Buscando libro con id={}", dto.getLibroId());
@@ -95,13 +101,23 @@ public class PrestamoService {
             usuario = usuarioClient.getUsuarioById(dto.getUsuarioId());
             log.info("Usuario encontrado: {}", usuario.getNombre());
 
+            log.info("Buscando inventario con libroId={}", dto.getLibroId());
+            inventario = inventarioClient.getInventarioById(dto.getLibroId());
+            log.info("Inventario encontrado. Stock={}", inventario.getStock());
+
         } catch (FeignException.NotFound e) {
             log.warn("Recurso no encontrado (404): {}", e.getMessage());
-            throw new RecursoNoEncontradoException("Libro o usuario no encontrado");
+            throw new RecursoNoEncontradoException("Libro, usuario o inventario no encontrado");
 
         } catch (FeignException e) {
             log.error("Error al llamar servicio externo: status={} mensaje={}", e.status(), e.getMessage());
             throw new ServicioNoDisponibleException("Servicio externo no disponible");
+        }
+
+        // Regla de negocio: no se puede prestar si stock es 0
+        if (inventario.getStock() <= 0) {
+            log.warn("Stock insuficiente para libroId={}", dto.getLibroId());
+            throw new RecursoNoEncontradoException("No hay stock disponible para este libro");
         }
 
         Prestamo prestamo = new Prestamo();
