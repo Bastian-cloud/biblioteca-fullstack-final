@@ -103,4 +103,64 @@ class PrestamoServiceTest {
                 () -> service.crearPrestamo(dto)
         );
     }
+
+    @Test
+    void buscarPrestamoPorIdCorrectamente() {
+
+        Prestamo prestamo = new Prestamo();
+        prestamo.setLibroId(1L);
+        prestamo.setUsuarioId(1L);
+        prestamo.setFechaPrestamo(LocalDate.now());
+        prestamo.setFechaDevolucion(LocalDate.now().plusDays(7));
+        prestamo.setEstado("ACTIVO");
+
+        LibroDTO libro = new LibroDTO(
+                1L,
+                1L,
+                "Clean Code",
+                "Robert C. Martin",
+                "48935347574"
+        );
+
+        UsuarioDTO usuario = new UsuarioDTO();
+        usuario.setId(1L);
+        usuario.setNombre("Bastian");
+
+        when(repository.findById(1L)).thenReturn(java.util.Optional.of(prestamo));
+        when(libroClient.getLibroById(1L)).thenReturn(libro);
+        when(usuarioClient.getUsuarioById(1L)).thenReturn(usuario);
+
+        PrestamoDTO resultado = service.findDtoById(1L);
+
+        assertNotNull(resultado);
+        assertEquals("Clean Code", resultado.getLibro());
+        assertEquals("Bastian", resultado.getUsuario());
+    }
+
+    @Test
+    void eliminarPrestamoCorrectamente() {
+
+        Prestamo prestamo = new Prestamo();
+        prestamo.setLibroId(1L);
+        prestamo.setUsuarioId(1L);
+
+        when(repository.findById(1L))
+                .thenReturn(java.util.Optional.of(prestamo));
+
+        service.eliminarPrestamo(1L);
+
+        verify(repository, times(1)).delete(prestamo);
+    }
+
+    @Test
+    void noDebeBuscarPrestamoSiNoExiste() {
+
+        when(repository.findById(1L))
+                .thenReturn(java.util.Optional.empty());
+
+        assertThrows(
+                RecursoNoEncontradoException.class,
+                () -> service.findDtoById(1L)
+        );
+    }
 }

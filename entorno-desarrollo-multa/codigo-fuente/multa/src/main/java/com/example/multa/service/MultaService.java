@@ -12,7 +12,11 @@ import com.example.multa.repository.MultaRepository;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class MultaService {
@@ -22,6 +26,9 @@ public class MultaService {
 
     private final MultaRepository repository;
     private final PrestamoClient prestamoClient;
+
+    @Value("${multa.valor-por-dia:1000}")
+    private double valorMultaPorDia;
 
     public MultaService(
             MultaRepository repository,
@@ -53,6 +60,14 @@ public class MultaService {
             throw new ServicioNoDisponibleException(
                     "Servicio de préstamos no disponible");
         }
+    }
+
+    // Calcula los días de retraso a partir de la fecha de devolución esperada
+    private int calcularDiasRetraso(LocalDate fechaDevolucionEsperada, LocalDate fechaReferencia) {
+
+        long dias = ChronoUnit.DAYS.between(fechaDevolucionEsperada, fechaReferencia);
+
+        return (int) Math.max(dias, 0);
     }
 
     // GET /api/multas/{id}
@@ -93,19 +108,26 @@ public class MultaService {
                 dto.getPrestamoId()
         );
 
+        int diasRetraso = calcularDiasRetraso(
+                prestamo.getFechaDevolucion(),
+                dto.getFechaMulta()
+        );
+
+        double monto = diasRetraso * valorMultaPorDia;
+
         Multa multa = new Multa();
 
         multa.setPrestamoId(dto.getPrestamoId());
         multa.setUsuarioId(dto.getUsuarioId());
-        multa.setMonto(dto.getMonto());
-        multa.setDiasRetraso(dto.getDiasRetraso());
+        multa.setMonto(monto);
+        multa.setDiasRetraso(diasRetraso);
         multa.setEstado(dto.getEstado());
         multa.setFechaMulta(dto.getFechaMulta());
 
         Multa guardada = repository.save(multa);
 
-        log.info("Multa creada correctamente. ID={}",
-                guardada.getId());
+        log.info("Multa creada correctamente. ID={}, diasRetraso={}, monto={}",
+                guardada.getId(), diasRetraso, monto);
 
         return new MultaDTO(
                 guardada.getId(),
@@ -135,17 +157,24 @@ public class MultaService {
                 dto.getPrestamoId()
         );
 
+        int diasRetraso = calcularDiasRetraso(
+                prestamo.getFechaDevolucion(),
+                dto.getFechaMulta()
+        );
+
+        double monto = diasRetraso * valorMultaPorDia;
+
         multa.setPrestamoId(dto.getPrestamoId());
         multa.setUsuarioId(dto.getUsuarioId());
-        multa.setMonto(dto.getMonto());
-        multa.setDiasRetraso(dto.getDiasRetraso());
+        multa.setMonto(monto);
+        multa.setDiasRetraso(diasRetraso);
         multa.setEstado(dto.getEstado());
         multa.setFechaMulta(dto.getFechaMulta());
 
         Multa actualizada = repository.save(multa);
 
-        log.info("Multa actualizada correctamente. ID={}",
-                actualizada.getId());
+        log.info("Multa actualizada correctamente. ID={}, diasRetraso={}, monto={}",
+                actualizada.getId(), diasRetraso, monto);
 
         return new MultaDTO(
                 actualizada.getId(),

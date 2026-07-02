@@ -384,7 +384,7 @@ http://52.73.191.33:8085/doc/swagger-ui.html
 * JUnit 5
 * Mockito
 
-## Ejecución del proyecto Para tests unitarios esto sirve tanto para prestamo como para multa
+## Ejecución del proyecto Para tests unitarios esto sirve tanto para prestamo como para
 
 ### 1. Ingresar al proyecto
 
@@ -427,3 +427,73 @@ Incluye pruebas para:
 ## Autor
 
 Bastian Mendoza
+
+## Microservicios del Sistema
+
+|Microservicio       |Puerto|DB Name           | Funcionalidad                                                                 |
+|--------------------------|-------------------|---------------------------------------------------------------------------------|
+|Libro-Service       |8080 |libros_db          | CRUD de libros y catálogo                                                       |
+|Inventario-Service  |8081 |inventario_db      | Control de stock y ubicación de libros                                          |
+|Prestamo-Service    |8082 |prestamos_db       | Gestión de préstamos y devoluciones; valida libro, usuario e inventario         |
+|Usuario-Service     |8083 |usuarios_db        | CRUD de usuarios de la biblioteca                                               |
+|Auth-Service        |8084 |auth_db            | Registro de usuarios y login                                                    |
+|Multa-Service       |8085 |universidad_backend| Gestión de multas generadas sobre préstamos vencidos                            |
+|Reserva-Service     |8086 |universidad_backend| Gestión de reservas de libros                                                   |
+|Categoria-Service   |8087 |universidad_backend| CRUD de categorías del catálogo de libros                                       |
+|Autor-Service       |8088 |universidad_backend| CRUD de autores del catálogo de libros                                          |
+|Notificacion-Service|8089 |universidad_backend| Envío y gestión de notificaciones a usuarios                                    |
+|ms-eureka           |8761 |                   | Registro y descubrimiento de instancias de los microservicios                   |
+
+## Rutas Principales por Servicio
+
+| Servicio                   | Ruta Base                     | Endpoint                     |
+|----------------------------|-------------------------------|-----------------------------------------|
+| Libro-Service              | `/api/libros`                 | `GET /api/libros/{id}`                  |
+| Inventario-Service         | `/api/inventario`             | `GET /api/inventario/{id}`              |
+| Prestamo-Service           | `/api/prestamos`              | `POST /api/prestamos`                   |
+| Usuario-Service            | `/api/usuarios`               | `GET /api/usuarios/{id}`                |
+| Auth-Service               | `/api/auth`                   | `POST /api/auth/login`                  |
+| Multa-Service              | `/api/multas`                 | `POST /api/multas`                      |
+| Reserva-Service            | `/api/reservas`               | `POST /api/reservas`                    |
+| Categoria-Service          | `/api/categorias`             | `GET /api/categorias/{id}`              |
+| Autor-Service              | `/api/autores`                | `GET /api/autores/{id}`                 |
+| Notificacion-Service       | `/api/notificaciones`         | `POST /api/notificaciones`              |
+
+### Security Groups configurados
+
+| Puerto | Servicio                          |
+|--------|-----------------------------------|
+| 22     | SSH                               |
+| 3306   | MySQL                             |
+| 8080   | Libro-Service                     |
+| 8081   | Inventario-Service                |
+| 8082   | Prestamo-Service                  |
+| 8083   | Usuario-Service                   |
+| 8084   | Auth-Service                      |
+| 8085   | Multa-Service                     |
+| 8086   | Reserva-Service                   |
+| 8087   | Categoria-Service                 |
+| 8088   | Autor-Service                     |
+| 8089   | Notificacion-Service              |
+| 8761   | ms-eureka (Dashboard)             |
+
+## Service Discovery (Eureka) y API Gateway
+
+### Eureka — Registro y Descubrimiento de Servicios
+
+El proyecto utiliza **Netflix Eureka** (vía Spring Cloud) como servidor de *Service Discovery*. Cada microservicio, al iniciar, se registra automáticamente en Eureka indicando su nombre, IP y puerto. Esto permite tener un panel centralizado donde se puede monitorear en tiempo real qué servicios están activos (`UP`) dentro del sistema.
+
+- **Servidor Eureka:** desplegado en una instancia EC2 independiente, en el puerto `8761`.
+- **Dashboard:** `http://<IP-EUREKA>:8761`
+- **Microservicios registrados:** Libro-Service, Inventario-Service, Prestamo-Service, Usuario-Service, Auth-Service, Multa-Service, Reserva-Service, Categoria-Service, Autor-Service, Notificacion-Service.
+
+> **Nota:** Actualmente Eureka funciona como panel de registro y monitoreo de instancias activas. La comunicación entre microservicios (mediante Feign Client) utiliza los nombres de contenedor Docker como URLs fijas (ej. `http://entorno-desarrollo:8080`), en lugar de descubrimiento dinámico a través de Eureka.
+
+### API Gateway
+
+El sistema **no cuenta actualmente con un API Gateway centralizado**. Cada microservicio se expone y se consume directamente a través de su propio puerto (ver tabla de microservicios), sin un punto de entrada único que enrute las peticiones.
+
+Los clientes (Postman, Swagger, frontend) acceden a cada servicio de forma independiente, por ejemplo:
+http://localhost:8080/api/libros/{}
+http://localhost:8081/api/inventario/{}
+http://localhost:8082/api/prestamos/{}
