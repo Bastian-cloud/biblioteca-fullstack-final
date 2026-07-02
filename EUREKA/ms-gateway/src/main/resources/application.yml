@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+
+        # Libros
+        - id: libro-route
+          uri: lb://LIBRO-API
+          predicates:
+            - Path=/api/libros/**
+
+        # Préstamos
+        - id: prestamo-route
+          uri: lb://PRESTAMO-API
+          predicates:
+            - Path=/api/prestamos/**
+
+        # Multas
+        - id: multa-route
+          uri: lb://MULTA
+          predicates:
+            - Path=/api/multas/**
+
+        # Inventario
+        - id: inventario-route
+          uri: lb://INVENTARIO-API
+          predicates:
+            - Path=/api/inventario/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
